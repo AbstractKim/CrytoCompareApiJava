@@ -11,7 +11,7 @@ public class LatestNewsArticles {
     @SerializedName("Message")
     private String message;
     @SerializedName("Promoted")
-    private ArrayList<Promoted> promoted;
+    public ArrayList<Promoted> promoted;
     @SerializedName("Data")
-    private ArrayList<Data> data;
+    public ArrayList<Data> data;
 }

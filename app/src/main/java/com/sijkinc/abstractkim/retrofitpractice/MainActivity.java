@@ -1,43 +1,57 @@
 package com.sijkinc.abstractkim.retrofitpractice;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.ListView;
+import android.util.TypedValue;
+import android.view.View;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.CrytoCompareApi;
 import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.CrytoCompareApiRxJava;
 import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.CrytoCompareService;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.ExcuteForResponse;
+import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.News.LatestNewsArticles.Data;
+import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.News.LatestNewsArticles.Promoted;
 import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.News.LatestNewsArticles.LatestNewsArticles;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.News.ListNewsFeeds.ListNewsFeeds;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Price.MultipleSymbolPrice.MultipleSymbolPrice;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Price.SingleSymbolPrice.SingleSymbolPrice;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.ByPairVolume.TopListByPairVolume;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.ByTotalVolume.TopListByTotalVolume;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.ByTradingPair.TopListByTradingPairs;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.TopExchangesFullDataByPair.TopExchangesFullDataByPair;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.TopExchangesVolumeDataByPair.TopExchangeVolumeDataByPair;
 
-
-import java.security.CryptoPrimitive;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "PeterLuke";
-    private ListView listView;
-
+    //private ListView listView;
+    private RecyclerView recyclerView;
+    private NewsAdapter adapter;
+    private List<News> newsList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        listView = (ListView) findViewById(R.id.lvRepo);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+
+        newsList = new ArrayList<>();
+        adapter = new NewsAdapter(this, newsList);
+
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 1);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(1, dpToPx(10), true));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
 
         /**
          * Retrofit Builder Part
@@ -142,12 +156,101 @@ public class MainActivity extends AppCompatActivity {
          final Disposable subscribe = observableLatestNewsArticles
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(latestNewsArticles -> Log.d(TAG, "RXJAVA--> " + latestNewsArticles.toString()));
+                .subscribe(latestNewsArticles -> {
+                    Log.d(TAG, "NEWS_COUNT:" + latestNewsArticles.data.size());
+                    prepareNews(latestNewsArticles.promoted, latestNewsArticles.data);
+                }
+                );
 
 //        CrytoCompareService.requestAndConsume(api.latestNewsArticles(null, null, null, null, "EN", null, null, null),
 //                response -> Log.d(TAG, "Nanma latestNewsArticles -->" + response.body().toString()),
 //                t-> Log.d(TAG, t.toString()));
     }
 
+    private void initCollapsingToolbar() {
+        final CollapsingToolbarLayout collapsingToolbar =
+                (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbar.setTitle(" ");
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+        appBarLayout.setExpanded(true);
 
+        // hiding & showing the title when toolbar expanded & collapsed
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            boolean isShow = false;
+            int scrollRange = -1;
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.getTotalScrollRange();
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    collapsingToolbar.setTitle(getString(R.string.app_name));
+                    isShow = true;
+                } else if (isShow) {
+                    collapsingToolbar.setTitle(" ");
+                    isShow = false;
+                }
+            }
+        });
+    }
+
+    /**
+     * RecyclerView item decoration - give equal margin around grid item
+     */
+    public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
+
+        private int spanCount;
+        private int spacing;
+        private boolean includeEdge;
+
+        public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
+            this.spanCount = spanCount;
+            this.spacing = spacing;
+            this.includeEdge = includeEdge;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            int position = parent.getChildAdapterPosition(view); // item position
+            int column = position % spanCount; // item column
+
+            if (includeEdge) {
+                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
+                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
+
+                if (position < spanCount) { // top edge
+                    outRect.top = spacing;
+                }
+                outRect.bottom = spacing; // item bottom
+            } else {
+                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
+                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
+                if (position >= spanCount) {
+                    outRect.top = spacing; // item top
+                }
+            }
+        }
+    }
+
+    private void prepareNews(ArrayList<Promoted> p, ArrayList<Data> d) {
+
+        try {
+            Glide.with(this).load(p.get(0).imageurl).into((ImageView) findViewById(R.id.backdrop));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        d.forEach( dd -> {
+            News a = new News(dd.title, dd.source, dd.imageurl);
+            newsList.add(a);
+        });
+
+        adapter.notifyDataSetChanged();
+    }
+
+    private int dpToPx(int dp) {
+        Resources r = getResources();
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    }
 }

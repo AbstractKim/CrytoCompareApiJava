@@ -2,10 +2,8 @@ package com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.News.LatestNewsArt
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
-
 @lombok.Data
-class Promoted {
+public class Promoted {
     @SerializedName("id")
     private String id;
     @SerializedName("guid")
@@ -13,9 +11,9 @@ class Promoted {
     @SerializedName("published_on")
     private String published_on;
     @SerializedName("imageurl")
-    private String imageurl;
+    public String imageurl;
     @SerializedName("title")
-    private String title;
+    public String title;
     @SerializedName("url")
     private String url;
     @SerializedName("source")
