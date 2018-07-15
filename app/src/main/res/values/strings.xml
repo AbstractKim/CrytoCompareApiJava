@@ -3,10 +3,12 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="coinlist_app_name">COINs</string>
+    <string name="coinlist_app_name">SIJK Cryptocurrency</string>
     <string name="coin_title">Title</string>
     <string name="coin_description">Description</string>
     <string name="coin_price">Price</string>
     <string name="coin_change24hour">Change</string>
-
+    <string name="action_settings">Settings</string>
+    <string name="action_add_favourite">Add to Favourites</string>
+    <string name="backdrop_subtitle">This season top news</string>
 </resources>

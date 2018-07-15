@@ -1,33 +1,11 @@
 package com.sijkinc.abstractkim.retrofitpractice;
 
 import android.annotation.SuppressLint;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
-
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.CrytoCompareApi;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.CrytoCompareApiRxJava;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.CrytoCompareService;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.ExcuteForResponse;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.News.LatestNewsArticles.LatestNewsArticles;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.News.ListNewsFeeds.ListNewsFeeds;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Price.MultipleSymbolPrice.MultipleSymbolPrice;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Price.SingleSymbolPrice.SingleSymbolPrice;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.ByPairVolume.TopListByPairVolume;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.ByTotalVolume.TopListByTotalVolume;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.ByTradingPair.TopListByTradingPairs;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.TopExchangesFullDataByPair.TopExchangesFullDataByPair;
-import com.sijkinc.abstractkim.retrofitpractice.CrytoCompare.Toplists.TopExchangesVolumeDataByPair.TopExchangeVolumeDataByPair;
-
-
-import java.security.CryptoPrimitive;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "PeterLuke";
@@ -38,6 +16,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Get the ViewPager and set it's PagerAdapter so that it can display items
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager.setAdapter(new CoinFragmentPagerAdapter(getSupportFragmentManager(),
+                MainActivity.this));
+
+        // Give the TabLayout the ViewPager
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
         /**
          * Retrofit Builder Part
          *   - add base url
@@ -159,12 +147,12 @@ public class MainActivity extends AppCompatActivity {
 //                     ()-> Log.d(TAG, "onComplete()")
 //        );
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.container, new CoinListFragment())
-                    .commit();
-        }
+//        if (savedInstanceState == null) {
+//            getSupportFragmentManager()
+//                    .beginTransaction()
+//                    .add(R.id.container, new CoinListFragment())
+//                    .commit();
+//        }
     }
 
 
