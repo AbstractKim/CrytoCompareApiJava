@@ -36,8 +36,6 @@ public class CoinListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_coin_list, container, false);
-        setUpToolBar(view);
-
 
         CoinInfoForCardView.COMPLETED_NUM = 0;
 
@@ -93,16 +91,4 @@ public class CoinListFragment extends Fragment {
         return view;
     }
 
-
-
-    /**
-     * set up toolbar
-     */
-    private void setUpToolBar(View view){
-        Toolbar toolbar = view.findViewById(R.id.app_bar);
-        AppCompatActivity activity = (AppCompatActivity)getActivity();
-        if(activity != null){
-            activity.setSupportActionBar(toolbar);
-        }
-    }
 }
